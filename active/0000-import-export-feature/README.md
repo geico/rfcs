@@ -6,11 +6,11 @@
 
 ## Summary
 
-This feature will add the ability to both export datasets to CSV files and import them back into DataHub from those CSV files, using the UI. The code for this feature is already complete, and in use internally at GEICO.
+This feature will add the ability to both export datasets to CSV files and import them back into DataHub from those CSV files, using the UI. The code for this feature is already complete. 
 
 ## Motivation
 
-This feature was originally developed for GEICO's internal usage. It was intended to mimic the import/export functionality present in Collibra. The DataHub team has requested we contribute this feature back to their open source repository.
+This feature was developed with the intention to mimic the import/export functionality present in Collibra. It is useful for moving datasets between instances of DataHub. Though not strictly a necessary feature, the DataHub team has expressed interest in adding it to the DataHub open source repository.
 
 ## Requirements
 
@@ -37,7 +37,7 @@ resource,asset_type,subresource,glossary_terms,tags,owners,ownership_type,descri
 
 Within `SearchExtendedMenu`, the container-level export option is only available when a container is being viewed. At all other times, it is grayed out and cannot be pressed. This is done using a react effect, which greys out the button unless the URL of the current page contains the word "container".
 
-When either export option is selected, it opens a modal which prompts the user to enter the name of the CSV file to be created. For dataset-level export, the user is also prompted to enter the data source, database, schema, and table name of the dataset to be exported. Notably, these fields are specific to GEICO's use case and may need to be altered. This is what the fields refer to:
+When either export option is selected, it opens a modal which prompts the user to enter the name of the CSV file to be created. For dataset-level export, the user is also prompted to enter the data source, database, schema, and table name of the dataset to be exported. Notably, these fields assume a specific number of containers to be present, which may not be the case for every data source. As such, this modal may need to be altered. This is what the fields presently refer to:
 - Data source: The name of the data platform containing the dataset
 - Database: A container representing a database within the data source
 - Schema: A container representing a schema within the source database
@@ -271,9 +271,9 @@ This feature would be best presented as a wholly new pattern. Though it is prese
 
 As mentioned before, this feature is only intended for use within the UI. As the code has currently been written, it would not be possible to extend the import and export functionality to a different API (i.e., REST), as all the code is written in React. 
 
-A possible alternative to this would be to move the code that performs the CSV data mutations and GraphQL querying to the Metadata Service or the Frontend Server, accessible from throughout the DataHub stack through a REST API or similar. This does not come without drawbacks, however. Namely, we would need to re-write the existing code entirely, and we'd be introducing additional complexity through the API endpoints. It's also notable that doing so is outside of the scope of GEICO's intent with this RFC, as we are simply hoping to share what we already have.
+A possible alternative to this would be to move the code that performs the CSV data mutations and GraphQL querying to the Metadata Service or the Frontend Server, accessible from throughout the DataHub stack through a REST API or similar. This does not come without drawbacks, however. Namely, we would need to re-write the existing code entirely, and we'd be introducing additional complexity through the API endpoints.
 
-It's also notable that because the format of the CSV files is so different from those produced by the existing functionality of downloading search results, existing CSV files cannot be used to import datasets. This may cause confuion among users, and may be worth remediating.
+It's also notable that because the format of the CSV files is so different from those produced by the existing functionality of downloading search results, existing CSV files cannot be used to import datasets. This may cause confusion among users, and may be worth remediating.
 
 It's also notable that a extension for DataHub does exist which adds very similar functionality ([link](https://datahubproject.io/docs/0.13.1/generated/ingestion/sources/csv/)). This has not been investigated in detail, but if this is a duplicate feature, it may not be worth integrating into DataHub.
 
@@ -287,4 +287,4 @@ As mentioned above, the `glossary_terms`, `tags`, and `ownership_type` CSV colum
 
 ## Unresolved questions
 
-It's notable that the dataset-level export component of this feature was designed specifically for GEICO's use case, as it requires filling out a form that assumes a specific count of containers is in use for all datasets. This is unlikely to always be the case, and as such, this component will likely need to be refactored to be more flexible. We will need to determine what shape the component should take before performing this refactoring.
+It's notable that the dataset-level export component of this feature was designed specifically for data sources with two layers of containers in DataHub. This is unlikely to always be the case, and as such, this component will likely need to be refactored to be more flexible. We will need to determine what shape the component should take before performing this refactoring.
