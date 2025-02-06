@@ -1,5 +1,5 @@
 - Start Date: 2024-11-12
-- RFC PR: (after opening the RFC PR, update this with a link to it and update the file name)
+- RFC PR: https://github.com/datahub-project/rfcs/pull/9
 - Implementation PR(s): 
 
 # Import/Export Feature
