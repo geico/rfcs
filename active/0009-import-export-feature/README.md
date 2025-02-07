@@ -1,5 +1,5 @@
 - Start Date: 2024-11-12
-- RFC PR: (after opening the RFC PR, update this with a link to it and update the file name)
+- RFC PR: https://github.com/datahub-project/rfcs/pull/9
 - Implementation PR(s): 
 
 # Import/Export Feature
@@ -36,7 +36,7 @@ resource,asset_type,subresource,glossary_terms,tags,owners,ownership_type,descri
 Here is information on how these CSV columns are used, and how the data stored within them is formatted:
 
 - Resource: The URN of the dataset. In the case of schema fields, this is the URN of the dataset which contains the schema field.
-- asset_type: What type of assset is contained in the row. This is either a dataset or schema field.
+- asset_type: What type of asset is contained in the row. This is either a dataset or schema field.
 - subresource: The name of the schema field. This is unused by rows containing datasets.
 - glossary_terms: A semicolon-separated list of glossary term URNs. This column is currently unused, but is planned to be used by both dataset and schema field rows.
 - tags: A semicolon-separated list of tag URNs. This column is currently unused, but is planned to be used by both dataset and schema field rows.
@@ -47,7 +47,7 @@ Here is information on how these CSV columns are used, and how the data stored w
 
 ### Export
 
-Within the `SearchExtendedMenu` dropdown, the container-level export option is only available when a container is being viewed. At all other times, it is grayed out and cannot be pressed. This is done using a react effect, which greys out the button unless the URL of the current page contains the word "container".
+Within the `SearchExtendedMenu` dropdown, the container-level export option is only available when a container is being viewed. At all other times, it is grayed out and cannot be pressed. This is done using a React effect, which greys out the button unless the URL of the current page contains the word "container".
 
 When either export option is selected, it opens a modal which prompts the user to enter the name of the CSV file to be created. For dataset-level export, the user is also prompted to enter the data source, database, schema, and table name of the dataset to be exported. Notably, these fields assume a specific number of containers to be present, which may not be the case for every data source. As such, this modal may need to be altered. This is what the fields presently refer to:
 - Data source: The name of the data platform containing the dataset.
@@ -67,7 +67,7 @@ Upon entry, the following steps occur:
 4. The metadata returned from the GraphQL query is transformed into a CSV-compatible JSON object using a shared function, `convertToCSVRows`. Each row in this JSON object contains the columns described in the prior section.
 5. The existing `downloadRowsAsCsv` function in [`csvUtils`](https://github.com/datahub-project/datahub/blob/master/datahub-web-react/src/app/search/utils/csvUtils.ts) is used to create the download.
 
-#### GraphQl queries
+#### GraphQL queries
 
 These GraphQL queries are used for container-level export and dataset-level export, respectively:
 
@@ -292,10 +292,10 @@ input SchemaFieldInput {
 
 Alongside these new GraphQL mutations, the necessary mappers and resolvers have been added to `datahub-graphql-core` to properly send the input to GMS. It's noteworthy that there are several fields required by the GraphQL mutation that are not present in the CSV Schema. Such fields are filled with these values on import:
 
-- `name`: The name is extracted from the dataset URN stored in the `resrource` CSV field.
+- `name`: The name is extracted from the dataset URN stored in the `resource` CSV field.
 - `version`: 0
 - `schemaName`: An empty string.
-- `platformUrn`: The platform URN is extracted from the dataset URN stored in the `resrource` CSV field.
+- `platformUrn`: The platform URN is extracted from the dataset URN stored in the `resource` CSV field.
 - `type`: `SchemaFieldDataType.Null`
 - `nativeDataType`: "Unknown Type"
 
@@ -319,7 +319,7 @@ A possible alternative to this would be to move the code that performs the CSV d
 
 It's also notable that because the format of the CSV files is so different from those produced by the existing functionality of downloading search results, existing CSV files cannot be used to import datasets. This may cause confusion among users, and may be worth remediating.
 
-It's also notable that a extension for DataHub does exist which adds very similar functionality ([link](https://datahubproject.io/docs/0.13.1/generated/ingestion/sources/csv/)). This has not been investigated in detail, but if this is a duplicate feature, it may not be worth integrating into DataHub.
+It's also notable that an extension for DataHub does exist which adds very similar functionality ([link](https://datahubproject.io/docs/0.13.1/generated/ingestion/sources/csv/)). This has not been investigated in detail, but if this is a duplicate feature, it may not be worth integrating into DataHub.
 
 ## Rollout / Adoption Strategy
 
@@ -331,7 +331,7 @@ Out of the required GraphQL fields that are presently missing on import, the `ty
 
 Additionally, the `glossary_terms`, `tags`, and `ownership_type` CSV columns are presently unused. It would be fairly simple to add the functionality to fill those columns in, however, as we are already fetching the necessary information for these fields in the search results of our GraphQL query. At the same time, the import code should be updated to make use of the `owners` column. To upsert this data to DataHub, either the `upsertDataset` mutation would need to be updated to handle the new information, or additional GraphQL mutations would need to be performed during import using existing mutations.
 
-As talked about in further detail below, the dataset-level export will also need to be refactored to be more flexible, as at present, it was designed to only work with data sources with two laters of containers in DataHub. It remains to be decided how it should be redesigned.
+As talked about in further detail below, the dataset-level export will also need to be refactored to be more flexible, as at present, it was designed to only work with data sources with two layers of containers in DataHub. It remains to be decided how it should be redesigned.
 
 ## Unresolved questions
 
