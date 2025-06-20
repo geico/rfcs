@@ -25,7 +25,7 @@ This feature is not intended to add a REST API for import/export like that of Co
 
 ## Detailed design
 
-This feature will add three new options to the existing `SearchExtendedMenu` dropdown, as can be seen in figure 1. The first option exports all datasets within a container, the decond exports individual datasets, and the third is used to import previously exported data into DataHub. The export options create CSV files from data existing in DataHub, while the import option adds new data to DataHub from CSV files. 
+This feature will add three new options to the existing `SearchExtendedMenu` dropdown, as can be seen in figure 1. The first option exports all datasets within a container, the second exports individual datasets, and the third is used to import previously exported data into DataHub. The export options create CSV files from data existing in DataHub, while the import option adds new data to DataHub from CSV files. 
 
 | ![Figure 1: Search extended menu](search_extended_menu.png "Figure 1") | 
 |:--:| 
