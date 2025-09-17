@@ -21,11 +21,15 @@ This feature as it is currently implemented is only intended to support:
 
 ## Non-Requirements
 
-This feature is not intended to add a REST API for import/export like that of Collibra. It is only intended for use through the UI.
+This feature is not intended to add a REST API for import/export like that of Collibra. It is only intended for use through the UI. Additionally, we do not intend for this feature to be used to import datasets built from scratch. The feature is only intended to import CSV files that have been previously exported from DataHub.
 
 ## Detailed design
 
-This feature will add three new options to the existing `SearchExtendedMenu` dropdown. One to export all datasets within a container, one to export individual datasets, and one to import previously exported data into DataHub. The export options create CSV files from data existing in DataHub, while the import option adds new data to DataHub from CSV files. 
+This feature will add three new options to the existing `SearchExtendedMenu` dropdown, as can be seen in figure 1. The first option exports all datasets within a container, the second exports individual datasets, and the third is used to import previously exported data into DataHub. The export options create CSV files from data existing in DataHub, while the import option adds new data to DataHub from CSV files. 
+
+| ![Figure 1: Search extended menu](search_extended_menu.png "Figure 1") | 
+|:--:| 
+| *Figure 1: Search extended menu* |
 
 Below is a list of the column names used in the CSV files for this feature. Within the CSV files, each row describes an individual dataset or schema field.
 
@@ -49,15 +53,23 @@ Here is information on how these CSV columns are used, and how the data stored w
 
 Within the `SearchExtendedMenu` dropdown, the container-level export option is only available when a container is being viewed. At all other times, it is grayed out and cannot be pressed. This is done using a React effect, which greys out the button unless the URL of the current page contains the word "container".
 
-When either export option is selected, it opens a modal which prompts the user to enter the name of the CSV file to be created. For dataset-level export, the user is also prompted to enter the data source, database, schema, and table name of the dataset to be exported. Notably, these fields assume a specific number of containers to be present, which may not be the case for every data source. As such, this modal may need to be altered. This is what the fields presently refer to:
+When either export option is selected, it opens a modal which prompts the user to enter the name of the CSV file to be created (see figures 2 and 3). For dataset-level export, the user is also prompted to enter the data source, database, schema, and table name of the dataset to be exported. Notably, these fields assume a specific number of containers to be present, which may not be the case for every data source. As such, this modal may need to be altered. This is what the fields presently refer to:
 - Data source: The name of the data platform containing the dataset.
 - Database: A container representing a database within the data source.
 - Schema: A container representing a schema within the source database.
 - Table name: The name of the dataset.
 
+| ![Figure 2: Dataset download modal](download_dataset_modal.png "Figure 2") | 
+|:--:| 
+| *Figure 2: Dataset download modal* |
+
+| ![Figure 3: Schema download modal](download_schema_modal.png "Figure 3") | 
+|:--:| 
+| *Figure 3: Schema download modal* |
+
 Upon entry, the following steps occur:
 
-1. The modal is made invisible, but continues executing code for the export process. A notification is created to inform the user that the export process is ongoing.
+1. The modal is made invisible, but continues executing code for the export process. A notification is created to inform the user that the export process is ongoing (see figure 4).
 2. The URN of the dataset or container is determined, by either:
     - Pulling from [`EntityContext`](https://github.com/datahub-project/datahub/blob/master/datahub-web-react/src/app/entity/shared/EntityContext.ts) in the case of container-level export.
     - Manually constructing the URN from data entered into the modal in the case of dataset-level export.
@@ -67,13 +79,17 @@ Upon entry, the following steps occur:
 4. The metadata returned from the GraphQL query is transformed into a CSV-compatible JSON object using a shared function, `convertToCSVRows`. Each row in this JSON object contains the columns described in the prior section.
 5. The existing `downloadRowsAsCsv` function in [`csvUtils`](https://github.com/datahub-project/datahub/blob/master/datahub-web-react/src/app/search/utils/csvUtils.ts) is used to create the download.
 
+| ![Figure 4: download notification](downloading_schema.png "Figure 4") | 
+|:--:| 
+| *Figure 4: Download notification* |
+
 #### GraphQL queries
 
 These GraphQL queries are used for container-level export and dataset-level export, respectively:
 
 ``` graphql
 query getDatasetByUrn($urn: String!, $start: Int!, $count: Int!) {
-    search(input: { type: DATASET, query: $urn, start: $start, count: $count }) {
+    search(input: { type: DATASET, query: "*", orFilters: [{and: [{field: "container", values: [$urn]}]}], start: $start, count: $count }) {
         start
         count
         total
@@ -258,6 +274,12 @@ In the case of import, the button first opens a prompt to upload a file, using t
 ``` jsx
 <input id="file" type="file" onChange={changeHandler} style={{ opacity: 0 }} />
 ```
+
+After the user has chosen a file for upload, a notification is shown to inform the user that the upload is in progress, as can be seen in figure 5. 
+
+| ![Figure 5: import notifications](import_notification.png "Figure 5") | 
+|:--:| 
+| *Figure 5: Import notifications* |
 
 The `papaparse` library is used to parse the CSV file and iterate over each row present within it. The data is then fed into GraphQL mutations to create datasets. Notably, a new GraphQL mutation had to be created to allow the upserting of schema metadata. Here is the specification for that new mutation:
 
